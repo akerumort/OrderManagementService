@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.sql.Timestamp;
 
 @Entity
 @Data
@@ -23,5 +24,5 @@ public class Order {
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
-    private java.sql.Timestamp orderDate;
+    private Timestamp orderDate;
 }
