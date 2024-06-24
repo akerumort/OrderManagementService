@@ -39,7 +39,7 @@ public class OrderController {
         return orderMapper.toDTO(order);
     }
 
-    @PostMapping
+    @PostMapping("/create")
     @Operation(summary = "Create a new order", description = "Create a new order with unique ID")
     public OrderDTO createOrder(
             @Parameter(description = "Order details", required = true)
@@ -49,7 +49,7 @@ public class OrderController {
         return orderMapper.toDTO(savedOrder);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id}/edit")
     @Operation(summary = "Update an existing order", description = "Update an existing order by ID")
     public OrderDTO updateOrder(
             @Parameter(description = "Order ID", required = true)
@@ -62,7 +62,7 @@ public class OrderController {
         return orderMapper.toDTO(updatedOrder);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}/delete")
     @Operation(summary = "Delete an order", description = "Delete an order by ID")
     public void deleteOrder(
             @Parameter(description = "Order ID", required = true)

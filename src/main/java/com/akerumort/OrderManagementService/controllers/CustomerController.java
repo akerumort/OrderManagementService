@@ -39,7 +39,7 @@ public class CustomerController {
         return customerMapper.toDTO(customer);
     }
 
-    @PostMapping
+    @PostMapping("/create")
     @Operation(summary = "Create a new customer", description = "Create a new customer with unique ID")
     public CustomerDTO createCustomer(
             @Parameter(description = "Customer details", required = true)
@@ -49,7 +49,7 @@ public class CustomerController {
         return customerMapper.toDTO(savedCustomer);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id}/edit")
     @Operation(summary = "Update an existing customer", description = "Update an existing customer by ID")
     public CustomerDTO updateCustomer(
             @Parameter(description = "Customer ID", required = true)
@@ -63,7 +63,7 @@ public class CustomerController {
     }
 
     @Operation(summary = "Delete a customer", description = "Delete a customer by ID")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}/delete")
     public void deleteCustomer(
             @Parameter(description = "Customer ID", required = true)
             @PathVariable Long id) {

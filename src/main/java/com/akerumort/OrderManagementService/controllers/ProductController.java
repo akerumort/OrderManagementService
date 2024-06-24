@@ -39,7 +39,7 @@ public class ProductController {
         return productMapper.toDTO(product);
     }
 
-    @PostMapping
+    @PostMapping("/create")
     @Operation(summary = "Create a new product", description = "Create a new product with unique ID")
     public ProductDTO createProduct(
             @Parameter(description = "Product details", required = true)
@@ -49,7 +49,7 @@ public class ProductController {
         return productMapper.toDTO(savedProduct);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id}/edit")
     @Operation(summary = "Update an existing product", description = "Update an existing product by ID")
     public ProductDTO updateProduct(
             @Parameter(description = "Product ID", required = true)
@@ -62,7 +62,7 @@ public class ProductController {
         return productMapper.toDTO(updatedProduct);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}/delete")
     @Operation(summary = "Delete a product", description = "Delete a product by ID")
     public void deleteProduct(
             @Parameter(description = "Product ID", required = true)
