@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.sql.Timestamp;
+import java.util.List;
 
 @Entity
 @Data
@@ -16,11 +17,11 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @OneToMany
+    @JoinColumn(name = "product_id")
+    private List<Product> products;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
