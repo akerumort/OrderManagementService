@@ -49,4 +49,25 @@ public class OrderController {
         Order savedOrder = orderService.saveOrder(order);
         return orderMapper.toDTO(savedOrder);
     }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update an existing order", description = "Update an existing order by ID")
+    public OrderDTO updateOrder(
+            @Parameter(description = "Order ID", required = true)
+            @PathVariable Long id,
+            @Parameter(description = "Updated order details", required = true)
+            @RequestBody OrderCreateDTO orderCreateDTO) {
+        Order existingOrder = orderService.getOrderById(id);
+        Order updatedOrder = orderMapper.toEntity(orderCreateDTO);
+        updatedOrder.setId(existingOrder.getId());
+        Order savedOrder = orderService.saveOrder(updatedOrder);
+        return orderMapper.toDTO(savedOrder);
+    }
+    @Operation(summary = "Delete an order", description = "Delete an order by ID")
+    @DeleteMapping("/{id}")
+    public void deleteOrder(
+            @Parameter(description = "Order ID", required = true)
+            @PathVariable Long id) {
+        orderService.deleteOrder(id);
+    }
 }
