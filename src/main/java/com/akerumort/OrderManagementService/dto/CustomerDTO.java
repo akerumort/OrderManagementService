@@ -1,8 +1,10 @@
 package com.akerumort.OrderManagementService.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class CustomerDTO {
     private Long id;
     private String name;

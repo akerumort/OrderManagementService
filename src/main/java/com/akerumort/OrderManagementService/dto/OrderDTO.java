@@ -1,14 +1,16 @@
 package com.akerumort.OrderManagementService.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.sql.Timestamp;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 public class OrderDTO {
     private Long id;
-    private List<ProductDTO> products;
     private CustomerDTO customer;
+    private List<ProductDTO> products;
     private Timestamp orderDate;
 }

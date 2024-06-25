@@ -37,9 +37,6 @@
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="product_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
             <column name="customer_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
@@ -48,16 +45,31 @@
             </column>
         </createTable>
 
-        <addForeignKeyConstraint baseTableName="orders"
-                                 baseColumnNames="product_id"
-                                 constraintName="fk_orders_product"
-                                 referencedTableName="product"
-                                 referencedColumnNames="id"/>
+        <createTable tableName="order_product">
+            <column name="order_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
 
         <addForeignKeyConstraint baseTableName="orders"
                                  baseColumnNames="customer_id"
                                  constraintName="fk_orders_customer"
                                  referencedTableName="customer"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="order_product"
+                                 baseColumnNames="order_id"
+                                 constraintName="fk_order_product_order"
+                                 referencedTableName="orders"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="order_product"
+                                 baseColumnNames="product_id"
+                                 constraintName="fk_order_product_product"
+                                 referencedTableName="product"
                                  referencedColumnNames="id"/>
 
         <insert tableName="product">
@@ -66,9 +78,22 @@
             <column name="price" value="9.99"/>
         </insert>
 
+        <insert tableName="product">
+            <column name="name" value="Test Product 2"/>
+            <column name="description" value="Some description..."/>
+            <column name="price" value="29.99"/>
+        </insert>
+
+        <insert tableName="product">
+            <column name="name" value="Test Product 3"/>
+            <column name="description" value="Some description..."/>
+            <column name="price" value="39.99"/>
+        </insert>
+
         <insert tableName="customer">
             <column name="name" value="Ivan Ivanov"/>
             <column name="email" value="ivanov@example.com"/>
         </insert>
+
     </changeSet>
 </databaseChangeLog>

@@ -1,5 +1,6 @@
 package com.akerumort.OrderManagementService.controllers;
 
+import com.akerumort.OrderManagementService.dto.OrderCreateDTO;
 import com.akerumort.OrderManagementService.dto.OrderDTO;
 import com.akerumort.OrderManagementService.entities.Order;
 import com.akerumort.OrderManagementService.mappers.OrderMapper;
@@ -39,34 +40,13 @@ public class OrderController {
         return orderMapper.toDTO(order);
     }
 
-    @PostMapping("/create")
-    @Operation(summary = "Create a new order", description = "Create a new order with unique ID")
+    @PostMapping
+    @Operation(summary = "Create a new order", description = "Create a new order with customer and products")
     public OrderDTO createOrder(
             @Parameter(description = "Order details", required = true)
-            @RequestBody OrderDTO orderDTO) {
-        Order order = orderMapper.toEntity(orderDTO);
+            @RequestBody OrderCreateDTO orderCreateDTO) {
+        Order order = orderMapper.toEntity(orderCreateDTO);
         Order savedOrder = orderService.saveOrder(order);
         return orderMapper.toDTO(savedOrder);
-    }
-
-    @PutMapping("/{id}/edit")
-    @Operation(summary = "Update an existing order", description = "Update an existing order by ID")
-    public OrderDTO updateOrder(
-            @Parameter(description = "Order ID", required = true)
-            @PathVariable Long id,
-            @Parameter(description = "Update order details", required = true)
-            @RequestBody OrderDTO orderDTO) {
-        Order order = orderMapper.toEntity(orderDTO);
-        order.setId(id);
-        Order updatedOrder = orderService.saveOrder(order);
-        return orderMapper.toDTO(updatedOrder);
-    }
-
-    @DeleteMapping("/{id}/delete")
-    @Operation(summary = "Delete an order", description = "Delete an order by ID")
-    public void deleteOrder(
-            @Parameter(description = "Order ID", required = true)
-            @PathVariable Long id) {
-        orderService.deleteOrder(id);
     }
 }

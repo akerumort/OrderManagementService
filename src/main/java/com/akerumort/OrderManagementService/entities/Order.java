@@ -1,16 +1,17 @@
 package com.akerumort.OrderManagementService.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.sql.Timestamp;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "orders")
 public class Order {
 
     @Id
@@ -18,8 +19,11 @@ public class Order {
     private Long id;
 
     @OneToMany
-    @JoinColumn(name = "product_id")
+    @JoinTable(name = "order_product",
+            joinColumns = @JoinColumn(name = "order_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id"))
     private List<Product> products;
+
 
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)

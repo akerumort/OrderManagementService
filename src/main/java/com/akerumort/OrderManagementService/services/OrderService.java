@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Service
@@ -33,41 +34,36 @@ public class OrderService {
     }
 
     public Order saveOrder(Order order) {
-        // Выполнение бизнес-логики перед сохранением заказа
         validateOrder(order);
-
+        order.setOrderDate(new Timestamp(System.currentTimeMillis())); // Устанавливаем текущую дату и время
         logger.info("Order created successfully for customer ID " + order.getCustomer().getId()
                 + " and products: " + order.getProducts());
         return orderRepository.save(order);
     }
 
     private void validateOrder(Order order) {
-        // Проверка наличия покупателя
         if (order.getCustomer() == null || order.getCustomer().getId() == null) {
             logger.error("Customer is required for creating an order. Order creation failed.");
             throw new IllegalArgumentException("Customer is required");
         }
 
-        // Проверка наличия товаров и их наличия на складе
         if (order.getProducts() == null || order.getProducts().isEmpty()) {
             logger.error("At least one product is required for creating an order. Order creation failed.");
             throw new IllegalArgumentException("At least one product is required");
         }
 
-            order.getProducts().forEach(product -> {
+        order.getProducts().forEach(product -> {
             if (product.getId() == null) {
                 logger.error("Product ID is required for creating an order. Order creation failed.");
                 throw new IllegalArgumentException("Product ID is required");
             }
 
-            // Проверка наличия товара в базе данных
             if (productRepository.findById(product.getId()).isEmpty()) {
                 logger.error("Product with ID " + product.getId() + " not found. Order creation failed.");
                 throw new IllegalArgumentException("Product not found");
             }
         });
 
-        // Проверка наличия покупателя в базе данных
         if (customerRepository.findById(order.getCustomer().getId()).isEmpty()) {
             logger.error("Customer with ID " + order.getCustomer().getId() + " not found. Order creation failed.");
             throw new IllegalArgumentException("Customer not found");

@@ -1,17 +1,39 @@
 package com.akerumort.OrderManagementService.mappers;
 
+import com.akerumort.OrderManagementService.dto.OrderCreateDTO;
 import com.akerumort.OrderManagementService.dto.OrderDTO;
 import com.akerumort.OrderManagementService.entities.Order;
+import com.akerumort.OrderManagementService.entities.Product;
+import com.akerumort.OrderManagementService.services.CustomerService;
+import com.akerumort.OrderManagementService.services.ProductService;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+import org.springframework.beans.factory.annotation.Autowired;
 
-@Mapper(componentModel = "spring", uses = {ProductMapper.class, CustomerMapper.class})
-public interface OrderMapper {
-    @Mapping(source = "product", target = "product")
-    @Mapping(source = "customer", target = "customer")
-    OrderDTO toDTO(Order order);
+import java.util.List;
+import java.util.stream.Collectors;
 
-    @Mapping(source = "product", target = "product")
+@Mapper(componentModel = "spring", uses = {CustomerService.class, ProductService.class})
+public abstract class OrderMapper {
+
+    @Autowired
+    private CustomerService customerService;
+
+    @Autowired
+    private ProductService productService;
+
+    @Mapping(source = "customerId", target = "customer.id")
+    @Mapping(source = "productIds", target = "products", qualifiedByName = "mapProductIdsToProducts")
+    @Mapping(target = "orderDate", ignore = true) // дата устанавливается в сервисе
+    public abstract Order toEntity(OrderCreateDTO orderCreateDTO);
+
     @Mapping(source = "customer", target = "customer")
-    Order toEntity(OrderDTO orderDTO);
+    @Mapping(source = "products", target = "products")
+    public abstract OrderDTO toDTO(Order order);
+
+    @Named("mapProductIdsToProducts")
+    List<Product> mapProductIdsToProducts(List<Long> productIds) {
+        return productIds.stream().map(productService::getProductById).collect(Collectors.toList());
+    }
 }
