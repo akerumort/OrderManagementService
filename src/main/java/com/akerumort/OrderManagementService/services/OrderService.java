@@ -26,10 +26,12 @@ public class OrderService {
     private ProductRepository productRepository;
 
     public List<Order> getAllOrders() {
+        logger.info("Fetched all orders");
         return orderRepository.findAll();
     }
 
     public Order getOrderById(Long id) {
+        logger.info("Fetched order by ID: " + id);
         return orderRepository.findById(id).orElse(null);
     }
 
