@@ -6,6 +6,7 @@ import com.akerumort.OrderManagementService.mappers.CustomerMapper;
 import com.akerumort.OrderManagementService.services.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,7 +44,7 @@ public class CustomerController {
     @Operation(summary = "Create a new customer", description = "Create a new customer with unique ID")
     public CustomerDTO createCustomer(
             @Parameter(description = "Customer details", required = true)
-            @RequestBody CustomerDTO customerDTO) {
+            @Valid @RequestBody CustomerDTO customerDTO) {
         Customer customer = customerMapper.toEntity(customerDTO);
         Customer savedCustomer = customerService.saveCustomer(customer);
         return customerMapper.toDTO(savedCustomer);
@@ -55,7 +56,7 @@ public class CustomerController {
             @Parameter(description = "Customer ID", required = true)
             @PathVariable Long id,
             @Parameter(description = "Updated customer details", required = true)
-            @RequestBody CustomerDTO customerDTO) {
+            @Valid @RequestBody CustomerDTO customerDTO) {
         Customer customer = customerMapper.toEntity(customerDTO);
         customer.setId(id);
         Customer updatedCustomer = customerService.saveCustomer(customer);

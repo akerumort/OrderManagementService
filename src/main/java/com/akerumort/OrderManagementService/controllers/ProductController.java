@@ -6,6 +6,7 @@ import com.akerumort.OrderManagementService.mappers.ProductMapper;
 import com.akerumort.OrderManagementService.services.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,7 +44,7 @@ public class ProductController {
     @Operation(summary = "Create a new product", description = "Create a new product with unique ID")
     public ProductDTO createProduct(
             @Parameter(description = "Product details", required = true)
-            @RequestBody ProductDTO productDTO) {
+            @Valid @RequestBody ProductDTO productDTO) {
         Product product = productMapper.toEntity(productDTO);
         Product savedProduct = productService.saveProduct(product);
         return productMapper.toDTO(savedProduct);
@@ -55,7 +56,7 @@ public class ProductController {
             @Parameter(description = "Product ID", required = true)
             @PathVariable Long id,
             @Parameter(description = "Updated product details", required = true)
-            @RequestBody ProductDTO productDTO) {
+            @Valid @RequestBody ProductDTO productDTO) {
         Product product = productMapper.toEntity(productDTO);
         product.setId(id);
         Product updatedProduct = productService.saveProduct(product);

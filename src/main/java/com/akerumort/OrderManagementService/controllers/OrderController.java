@@ -7,6 +7,7 @@ import com.akerumort.OrderManagementService.mappers.OrderMapper;
 import com.akerumort.OrderManagementService.services.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,7 +45,7 @@ public class OrderController {
     @Operation(summary = "Create a new order", description = "Create a new order with customer and products")
     public OrderDTO createOrder(
             @Parameter(description = "Order details", required = true)
-            @RequestBody OrderCreateDTO orderCreateDTO) {
+            @Valid @RequestBody OrderCreateDTO orderCreateDTO) {
         Order order = orderMapper.toEntity(orderCreateDTO);
         Order savedOrder = orderService.saveOrder(order);
         return orderMapper.toDTO(savedOrder);
@@ -56,7 +57,7 @@ public class OrderController {
             @Parameter(description = "Order ID", required = true)
             @PathVariable Long id,
             @Parameter(description = "Updated order details", required = true)
-            @RequestBody OrderCreateDTO orderCreateDTO) {
+            @Valid @RequestBody OrderCreateDTO orderCreateDTO) {
         Order existingOrder = orderService.getOrderById(id);
         Order updatedOrder = orderMapper.toEntity(orderCreateDTO);
         updatedOrder.setId(existingOrder.getId());
