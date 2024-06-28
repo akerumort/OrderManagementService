@@ -1,5 +1,6 @@
 package com.akerumort.OrderManagementService.controllers;
 
+import com.akerumort.OrderManagementService.dto.CustomerCreateDTO;
 import com.akerumort.OrderManagementService.dto.CustomerDTO;
 import com.akerumort.OrderManagementService.entities.Customer;
 import com.akerumort.OrderManagementService.mappers.CustomerMapper;
@@ -41,11 +42,11 @@ public class CustomerController {
     }
 
     @PostMapping
-    @Operation(summary = "Create a new customer", description = "Create a new customer with unique ID")
+    @Operation(summary = "Create a new customer", description = "Create a new customer")
     public CustomerDTO createCustomer(
             @Parameter(description = "Customer details", required = true)
-            @Valid @RequestBody CustomerDTO customerDTO) {
-        Customer customer = customerMapper.toEntity(customerDTO);
+            @Valid @RequestBody CustomerCreateDTO customerCreateDTO) {
+        Customer customer = customerMapper.toEntity(customerCreateDTO);
         Customer savedCustomer = customerService.saveCustomer(customer);
         return customerMapper.toDTO(savedCustomer);
     }
@@ -56,15 +57,16 @@ public class CustomerController {
             @Parameter(description = "Customer ID", required = true)
             @PathVariable Long id,
             @Parameter(description = "Updated customer details", required = true)
-            @Valid @RequestBody CustomerDTO customerDTO) {
-        Customer customer = customerMapper.toEntity(customerDTO);
-        customer.setId(id);
-        Customer updatedCustomer = customerService.saveCustomer(customer);
-        return customerMapper.toDTO(updatedCustomer);
+            @Valid @RequestBody CustomerCreateDTO customerCreateDTO) {
+        Customer existingCustomer = customerService.getCustomerById(id);
+        Customer updatedCustomer = customerMapper.toEntity(customerCreateDTO);
+        updatedCustomer.setId(existingCustomer.getId());
+        Customer savedCustomer = customerService.saveCustomer(updatedCustomer);
+        return customerMapper.toDTO(savedCustomer);
     }
 
-    @Operation(summary = "Delete a customer", description = "Delete a customer by ID")
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a customer", description = "Delete a customer by ID")
     public void deleteCustomer(
             @Parameter(description = "Customer ID", required = true)
             @PathVariable Long id) {

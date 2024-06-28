@@ -64,8 +64,9 @@ public class OrderController {
         Order savedOrder = orderService.saveOrder(updatedOrder);
         return orderMapper.toDTO(savedOrder);
     }
-    @Operation(summary = "Delete an order", description = "Delete an order by ID")
+
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete an order", description = "Delete an order by ID")
     public void deleteOrder(
             @Parameter(description = "Order ID", required = true)
             @PathVariable Long id) {

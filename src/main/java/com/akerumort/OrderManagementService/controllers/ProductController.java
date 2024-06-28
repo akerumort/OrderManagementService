@@ -1,5 +1,6 @@
 package com.akerumort.OrderManagementService.controllers;
 
+import com.akerumort.OrderManagementService.dto.ProductCreateDTO;
 import com.akerumort.OrderManagementService.dto.ProductDTO;
 import com.akerumort.OrderManagementService.entities.Product;
 import com.akerumort.OrderManagementService.mappers.ProductMapper;
@@ -41,11 +42,11 @@ public class ProductController {
     }
 
     @PostMapping
-    @Operation(summary = "Create a new product", description = "Create a new product with unique ID")
+    @Operation(summary = "Create a new product", description = "Create a new product")
     public ProductDTO createProduct(
             @Parameter(description = "Product details", required = true)
-            @Valid @RequestBody ProductDTO productDTO) {
-        Product product = productMapper.toEntity(productDTO);
+            @Valid @RequestBody ProductCreateDTO productCreateDTO) {
+        Product product = productMapper.toEntity(productCreateDTO);
         Product savedProduct = productService.saveProduct(product);
         return productMapper.toDTO(savedProduct);
     }
@@ -56,11 +57,12 @@ public class ProductController {
             @Parameter(description = "Product ID", required = true)
             @PathVariable Long id,
             @Parameter(description = "Updated product details", required = true)
-            @Valid @RequestBody ProductDTO productDTO) {
-        Product product = productMapper.toEntity(productDTO);
-        product.setId(id);
-        Product updatedProduct = productService.saveProduct(product);
-        return productMapper.toDTO(updatedProduct);
+            @Valid @RequestBody ProductCreateDTO productCreateDTO) {
+        Product existingProduct = productService.getProductById(id);
+        Product updatedProduct = productMapper.toEntity(productCreateDTO);
+        updatedProduct.setId(existingProduct.getId());
+        Product savedProduct = productService.saveProduct(updatedProduct);
+        return productMapper.toDTO(savedProduct);
     }
 
     @DeleteMapping("/{id}")
