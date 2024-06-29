@@ -33,7 +33,7 @@
             </column>
         </createTable>
 
-        <createTable tableName="orders">
+        <createTable tableName="order">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -54,16 +54,16 @@
             </column>
         </createTable>
 
-        <addForeignKeyConstraint baseTableName="orders"
+        <addForeignKeyConstraint baseTableName="order"
                                  baseColumnNames="customer_id"
-                                 constraintName="fk_orders_customer"
+                                 constraintName="fk_order_customer"
                                  referencedTableName="customer"
                                  referencedColumnNames="id"/>
 
         <addForeignKeyConstraint baseTableName="order_product"
                                  baseColumnNames="order_id"
                                  constraintName="fk_order_product_order"
-                                 referencedTableName="orders"
+                                 referencedTableName="order"
                                  referencedColumnNames="id"/>
 
         <addForeignKeyConstraint baseTableName="order_product"
