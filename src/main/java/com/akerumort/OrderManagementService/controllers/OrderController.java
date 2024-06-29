@@ -3,6 +3,7 @@ package com.akerumort.OrderManagementService.controllers;
 import com.akerumort.OrderManagementService.dto.OrderCreateDTO;
 import com.akerumort.OrderManagementService.dto.OrderDTO;
 import com.akerumort.OrderManagementService.entities.Order;
+import com.akerumort.OrderManagementService.exceptions.CustomValidationException;
 import com.akerumort.OrderManagementService.mappers.OrderMapper;
 import com.akerumort.OrderManagementService.services.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,32 +42,40 @@ public class OrderController {
         return orderMapper.toDTO(order);
     }
 
-    @PostMapping
+    @PostMapping("/create")
     @Operation(summary = "Create a new order", description = "Create a new order with customer and products")
     public OrderDTO createOrder(
             @Parameter(description = "Order details", required = true)
             @Valid @RequestBody OrderCreateDTO orderCreateDTO) {
-        Order order = orderMapper.toEntity(orderCreateDTO);
-        Order savedOrder = orderService.saveOrder(order);
-        return orderMapper.toDTO(savedOrder);
+        try {
+            Order order = orderMapper.toEntity(orderCreateDTO);
+            Order savedOrder = orderService.saveOrder(order);
+            return orderMapper.toDTO(savedOrder);
+        } catch (Exception e) {
+            throw new CustomValidationException("Error creating order: " + e.getMessage());
+        }
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id}/edit")
     @Operation(summary = "Update an existing order", description = "Update an existing order by ID")
     public OrderDTO updateOrder(
             @Parameter(description = "Order ID", required = true)
             @PathVariable Long id,
             @Parameter(description = "Updated order details", required = true)
             @Valid @RequestBody OrderCreateDTO orderCreateDTO) {
-        Order existingOrder = orderService.getOrderById(id);
-        Order updatedOrder = orderMapper.toEntity(orderCreateDTO);
-        updatedOrder.setId(existingOrder.getId());
-        Order savedOrder = orderService.saveOrder(updatedOrder);
-        return orderMapper.toDTO(savedOrder);
+        try {
+            Order existingOrder = orderService.getOrderById(id);
+            Order updatedOrder = orderMapper.toEntity(orderCreateDTO);
+            updatedOrder.setId(existingOrder.getId());
+            Order savedOrder = orderService.saveOrder(updatedOrder);
+            return orderMapper.toDTO(savedOrder);
+        } catch (Exception e) {
+            throw new CustomValidationException("Error updating order: " + e.getMessage());
+        }
     }
 
-    @DeleteMapping("/{id}")
     @Operation(summary = "Delete an order", description = "Delete an order by ID")
+    @DeleteMapping("/{id}/delete")
     public void deleteOrder(
             @Parameter(description = "Order ID", required = true)
             @PathVariable Long id) {

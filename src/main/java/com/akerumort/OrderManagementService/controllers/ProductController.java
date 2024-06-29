@@ -3,6 +3,7 @@ package com.akerumort.OrderManagementService.controllers;
 import com.akerumort.OrderManagementService.dto.ProductCreateDTO;
 import com.akerumort.OrderManagementService.dto.ProductDTO;
 import com.akerumort.OrderManagementService.entities.Product;
+import com.akerumort.OrderManagementService.exceptions.CustomValidationException;
 import com.akerumort.OrderManagementService.mappers.ProductMapper;
 import com.akerumort.OrderManagementService.services.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,32 +42,39 @@ public class ProductController {
         return productMapper.toDTO(product);
     }
 
-    @PostMapping
-    @Operation(summary = "Create a new product", description = "Create a new product")
+    @PostMapping("/create")
+    @Operation(summary = "Create a new product", description = "Create a new product with unique ID")
     public ProductDTO createProduct(
             @Parameter(description = "Product details", required = true)
             @Valid @RequestBody ProductCreateDTO productCreateDTO) {
-        Product product = productMapper.toEntity(productCreateDTO);
-        Product savedProduct = productService.saveProduct(product);
-        return productMapper.toDTO(savedProduct);
+        try {
+            Product product = productMapper.toEntity(productCreateDTO);
+            Product savedProduct = productService.saveProduct(product);
+            return productMapper.toDTO(savedProduct);
+        } catch (Exception e) {
+            throw new CustomValidationException("Error creating product: " + e.getMessage());
+        }
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id}/edit")
     @Operation(summary = "Update an existing product", description = "Update an existing product by ID")
     public ProductDTO updateProduct(
             @Parameter(description = "Product ID", required = true)
             @PathVariable Long id,
             @Parameter(description = "Updated product details", required = true)
             @Valid @RequestBody ProductCreateDTO productCreateDTO) {
-        Product existingProduct = productService.getProductById(id);
-        Product updatedProduct = productMapper.toEntity(productCreateDTO);
-        updatedProduct.setId(existingProduct.getId());
-        Product savedProduct = productService.saveProduct(updatedProduct);
-        return productMapper.toDTO(savedProduct);
+        try {
+            Product product = productMapper.toEntity(productCreateDTO);
+            product.setId(id);
+            Product updatedProduct = productService.saveProduct(product);
+            return productMapper.toDTO(updatedProduct);
+        } catch (Exception e) {
+            throw new CustomValidationException("Error updating product: " + e.getMessage());
+        }
     }
 
-    @DeleteMapping("/{id}")
     @Operation(summary = "Delete a product", description = "Delete a product by ID")
+    @DeleteMapping("/{id}/delete")
     public void deleteProduct(
             @Parameter(description = "Product ID", required = true)
             @PathVariable Long id) {

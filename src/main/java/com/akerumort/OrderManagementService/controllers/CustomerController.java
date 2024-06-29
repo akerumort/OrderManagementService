@@ -3,6 +3,7 @@ package com.akerumort.OrderManagementService.controllers;
 import com.akerumort.OrderManagementService.dto.CustomerCreateDTO;
 import com.akerumort.OrderManagementService.dto.CustomerDTO;
 import com.akerumort.OrderManagementService.entities.Customer;
+import com.akerumort.OrderManagementService.exceptions.CustomValidationException;
 import com.akerumort.OrderManagementService.mappers.CustomerMapper;
 import com.akerumort.OrderManagementService.services.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,32 +42,39 @@ public class CustomerController {
         return customerMapper.toDTO(customer);
     }
 
-    @PostMapping
-    @Operation(summary = "Create a new customer", description = "Create a new customer")
+    @PostMapping("/create")
+    @Operation(summary = "Create a new customer", description = "Create a new customer with unique ID")
     public CustomerDTO createCustomer(
             @Parameter(description = "Customer details", required = true)
             @Valid @RequestBody CustomerCreateDTO customerCreateDTO) {
-        Customer customer = customerMapper.toEntity(customerCreateDTO);
-        Customer savedCustomer = customerService.saveCustomer(customer);
-        return customerMapper.toDTO(savedCustomer);
+        try {
+            Customer customer = customerMapper.toEntity(customerCreateDTO);
+            Customer savedCustomer = customerService.saveCustomer(customer);
+            return customerMapper.toDTO(savedCustomer);
+        } catch (Exception e) {
+            throw new CustomValidationException("Error creating customer: " + e.getMessage());
+        }
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id}/edit")
     @Operation(summary = "Update an existing customer", description = "Update an existing customer by ID")
     public CustomerDTO updateCustomer(
             @Parameter(description = "Customer ID", required = true)
             @PathVariable Long id,
             @Parameter(description = "Updated customer details", required = true)
             @Valid @RequestBody CustomerCreateDTO customerCreateDTO) {
-        Customer existingCustomer = customerService.getCustomerById(id);
-        Customer updatedCustomer = customerMapper.toEntity(customerCreateDTO);
-        updatedCustomer.setId(existingCustomer.getId());
-        Customer savedCustomer = customerService.saveCustomer(updatedCustomer);
-        return customerMapper.toDTO(savedCustomer);
+        try {
+            Customer customer = customerMapper.toEntity(customerCreateDTO);
+            customer.setId(id);
+            Customer updatedCustomer = customerService.saveCustomer(customer);
+            return customerMapper.toDTO(updatedCustomer);
+        } catch (Exception e) {
+            throw new CustomValidationException("Error updating customer: " + e.getMessage());
+        }
     }
 
-    @DeleteMapping("/{id}")
     @Operation(summary = "Delete a customer", description = "Delete a customer by ID")
+    @DeleteMapping("/{id}/delete")
     public void deleteCustomer(
             @Parameter(description = "Customer ID", required = true)
             @PathVariable Long id) {
