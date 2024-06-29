@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="2" author="akerumort">
+        <insert tableName="product">
+            <column name="name" value="Test Product"/>
+            <column name="description" value="Some description..."/>
+            <column name="price" value="9.99"/>
+        </insert>
+
+        <insert tableName="product">
+            <column name="name" value="Test Product 2"/>
+            <column name="description" value="Some description..."/>
+            <column name="price" value="29.99"/>
+        </insert>
+
+        <insert tableName="product">
+            <column name="name" value="Test Product 3"/>
+            <column name="description" value="Some description..."/>
+            <column name="price" value="39.99"/>
+        </insert>
+
+        <insert tableName="product">
+            <column name="name" value="Test Product 4"/>
+            <column name="description" value="Some description..."/>
+            <column name="price" value="49.99"/>
+        </insert>
+
+        <insert tableName="product">
+            <column name="name" value="Test Product 5"/>
+            <column name="description" value="Some description..."/>
+            <column name="price" value="59.99"/>
+        </insert>
+
+        <insert tableName="customer">
+            <column name="name" value="Ivan Ivanov"/>
+            <column name="email" value="ivanov@example.com"/>
+        </insert>
+
+        <insert tableName="customer">
+            <column name="name" value="Petr Petrov"/>
+            <column name="email" value="petrov@example.com"/>
+        </insert>
+
+        <insert tableName="customer">
+            <column name="name" value="Semen Semenov"/>
+            <column name="email" value="semenov@example.com"/>
+        </insert>
+
+        <insert tableName="customer">
+            <column name="name" value="Maxim Maximov"/>
+            <column name="email" value="maximov@example.com"/>
+        </insert>
+
+    </changeSet>
+</databaseChangeLog>

@@ -3,7 +3,7 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <changeSet id="1" author="akerumort">
         <createTable tableName="product">
@@ -71,29 +71,5 @@
                                  constraintName="fk_order_product_product"
                                  referencedTableName="product"
                                  referencedColumnNames="id"/>
-
-        <insert tableName="product">
-            <column name="name" value="Test Product"/>
-            <column name="description" value="Some description..."/>
-            <column name="price" value="9.99"/>
-        </insert>
-
-        <insert tableName="product">
-            <column name="name" value="Test Product 2"/>
-            <column name="description" value="Some description..."/>
-            <column name="price" value="29.99"/>
-        </insert>
-
-        <insert tableName="product">
-            <column name="name" value="Test Product 3"/>
-            <column name="description" value="Some description..."/>
-            <column name="price" value="39.99"/>
-        </insert>
-
-        <insert tableName="customer">
-            <column name="name" value="Ivan Ivanov"/>
-            <column name="email" value="ivanov@example.com"/>
-        </insert>
-
     </changeSet>
 </databaseChangeLog>
