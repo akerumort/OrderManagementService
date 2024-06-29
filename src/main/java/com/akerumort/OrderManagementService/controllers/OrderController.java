@@ -42,7 +42,7 @@ public class OrderController {
         return orderMapper.toDTO(order);
     }
 
-    @PostMapping("/create")
+    @PostMapping
     @Operation(summary = "Create a new order", description = "Create a new order with customer and products")
     public OrderDTO createOrder(
             @Parameter(description = "Order details", required = true)
@@ -56,7 +56,7 @@ public class OrderController {
         }
     }
 
-    @PutMapping("/{id}/edit")
+    @PutMapping("/{id}")
     @Operation(summary = "Update an existing order", description = "Update an existing order by ID")
     public OrderDTO updateOrder(
             @Parameter(description = "Order ID", required = true)
@@ -75,7 +75,7 @@ public class OrderController {
     }
 
     @Operation(summary = "Delete an order", description = "Delete an order by ID")
-    @DeleteMapping("/{id}/delete")
+    @DeleteMapping("/{id}")
     public void deleteOrder(
             @Parameter(description = "Order ID", required = true)
             @PathVariable Long id) {
