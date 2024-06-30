@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -32,14 +33,20 @@ public class OrderService {
 
     public Order getOrderById(Long id) {
         logger.info("Fetched order by ID: " + id);
-        return orderRepository.findById(id).orElse(null);
+        return orderRepository.findById(id).orElseThrow(() ->
+                new RuntimeException("Order not found"));
     }
 
     public Order saveOrder(Order order) {
         validateOrder(order);
-        order.setOrderDate(new Timestamp(System.currentTimeMillis())); // Устанавливаем текущую дату и время
+        order.setOrderDate(new Timestamp(System.currentTimeMillis())); // текущая дата и время
+
+        String productsInfo = order.getProducts().stream()
+                .map(product -> "ID: " + product.getId())
+                .collect(Collectors.joining("; "));
+
         logger.info("Order created successfully for customer ID " + order.getCustomer().getId()
-                + " and products: " + order.getProducts());
+                + " and products: " + productsInfo);
         return orderRepository.save(order);
     }
 
