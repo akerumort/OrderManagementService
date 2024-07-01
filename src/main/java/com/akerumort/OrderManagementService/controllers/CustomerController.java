@@ -10,9 +10,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -46,14 +50,17 @@ public class CustomerController {
     @Operation(summary = "Create a new customer", description = "Create a new customer with unique ID")
     public CustomerDTO createCustomer(
             @Parameter(description = "Customer details", required = true)
-            @Valid @RequestBody CustomerCreateDTO customerCreateDTO) {
-        try {
-            Customer customer = customerMapper.toEntity(customerCreateDTO);
-            Customer savedCustomer = customerService.saveCustomer(customer);
-            return customerMapper.toDTO(savedCustomer);
-        } catch (Exception e) {
-            throw new CustomValidationException("Error creating customer: " + e.getMessage());
+            @Valid @RequestBody CustomerCreateDTO customerCreateDTO, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            for (FieldError error : bindingResult.getFieldErrors()) {
+                errors.put(error.getField(), error.getDefaultMessage());
+            }
+            throw new CustomValidationException("Validation errors: " + errors.toString());
         }
+        Customer customer = customerMapper.toEntity(customerCreateDTO);
+        Customer savedCustomer = customerService.saveCustomer(customer);
+        return customerMapper.toDTO(savedCustomer);
     }
 
     @PutMapping("/{id}")
@@ -62,15 +69,18 @@ public class CustomerController {
             @Parameter(description = "Customer ID", required = true)
             @PathVariable Long id,
             @Parameter(description = "Updated customer details", required = true)
-            @Valid @RequestBody CustomerCreateDTO customerCreateDTO) {
-        try {
-            Customer customer = customerMapper.toEntity(customerCreateDTO);
-            customer.setId(id);
-            Customer updatedCustomer = customerService.saveCustomer(customer);
-            return customerMapper.toDTO(updatedCustomer);
-        } catch (Exception e) {
-            throw new CustomValidationException("Error updating customer: " + e.getMessage());
+            @Valid @RequestBody CustomerCreateDTO customerCreateDTO, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            for (FieldError error : bindingResult.getFieldErrors()) {
+                errors.put(error.getField(), error.getDefaultMessage());
+            }
+            throw new CustomValidationException("Validation errors: " + errors.toString());
         }
+        Customer customer = customerMapper.toEntity(customerCreateDTO);
+        customer.setId(id);
+        Customer updatedCustomer = customerService.saveCustomer(customer);
+        return customerMapper.toDTO(updatedCustomer);
     }
 
     @Operation(summary = "Delete a customer", description = "Delete a customer by ID")
