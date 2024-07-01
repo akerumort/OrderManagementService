@@ -10,9 +10,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -46,14 +50,17 @@ public class ProductController {
     @Operation(summary = "Create a new product", description = "Create a new product with unique ID")
     public ProductDTO createProduct(
             @Parameter(description = "Product details", required = true)
-            @Valid @RequestBody ProductCreateDTO productCreateDTO) {
-        try {
-            Product product = productMapper.toEntity(productCreateDTO);
-            Product savedProduct = productService.saveProduct(product);
-            return productMapper.toDTO(savedProduct);
-        } catch (Exception e) {
-            throw new CustomValidationException("Error creating product: " + e.getMessage());
+            @Valid @RequestBody ProductCreateDTO productCreateDTO, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            for (FieldError error : bindingResult.getFieldErrors()) {
+                errors.put(error.getField(), error.getDefaultMessage());
+            }
+            throw new CustomValidationException("Validation errors: " + errors.toString());
         }
+        Product product = productMapper.toEntity(productCreateDTO);
+        Product savedProduct = productService.saveProduct(product);
+        return productMapper.toDTO(savedProduct);
     }
 
     @PutMapping("/{id}")
@@ -62,15 +69,18 @@ public class ProductController {
             @Parameter(description = "Product ID", required = true)
             @PathVariable Long id,
             @Parameter(description = "Updated product details", required = true)
-            @Valid @RequestBody ProductCreateDTO productCreateDTO) {
-        try {
-            Product product = productMapper.toEntity(productCreateDTO);
-            product.setId(id);
-            Product updatedProduct = productService.saveProduct(product);
-            return productMapper.toDTO(updatedProduct);
-        } catch (Exception e) {
-            throw new CustomValidationException("Error updating product: " + e.getMessage());
+            @Valid @RequestBody ProductCreateDTO productCreateDTO, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            for (FieldError error : bindingResult.getFieldErrors()) {
+                errors.put(error.getField(), error.getDefaultMessage());
+            }
+            throw new CustomValidationException("Validation errors: " + errors.toString());
         }
+        Product product = productMapper.toEntity(productCreateDTO);
+        product.setId(id);
+        Product updatedProduct = productService.saveProduct(product);
+        return productMapper.toDTO(updatedProduct);
     }
 
     @Operation(summary = "Delete a product", description = "Delete a product by ID")
