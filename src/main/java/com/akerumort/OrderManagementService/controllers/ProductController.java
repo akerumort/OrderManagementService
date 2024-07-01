@@ -10,9 +10,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -86,7 +83,6 @@ public class ProductController {
             throw new CustomValidationException("Validation errors: " + errors.toString());
         }
         Product product = productMapper.toEntity(productCreateDTO);
-        product.setId(id);
         Product updatedProduct = productService.saveProduct(product);
         return productMapper.toDTO(updatedProduct);
     }

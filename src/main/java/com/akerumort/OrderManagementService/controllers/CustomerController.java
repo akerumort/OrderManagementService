@@ -83,7 +83,6 @@ public class CustomerController {
             throw new CustomValidationException("Validation errors: " + errors.toString());
         }
         Customer customer = customerMapper.toEntity(customerCreateDTO);
-        customer.setId(id);
         Customer updatedCustomer = customerService.saveCustomer(customer);
         return customerMapper.toDTO(updatedCustomer);
     }
