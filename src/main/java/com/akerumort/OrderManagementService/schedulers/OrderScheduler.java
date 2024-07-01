@@ -16,6 +16,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -43,18 +44,16 @@ public class OrderScheduler {
     @Async
     @Scheduled(fixedRate = 60000) // every 60 sec
     public void createRandomOrder() {
-
         try {
-
             // random customers
-            List<Customer> customers = customerService.getAllCustomers();
+            List<Customer> customers = customerService.getAllCustomers(0, 100);
             if (customers.isEmpty()) {
                 return;
             }
             Customer randomCustomer = customers.get(random.nextInt(customers.size()));
 
             // random products
-            List<Product> products = productService.getAllProducts();
+            List<Product> products = new ArrayList<>(productService.getAllProducts(0, 100)); // ensure it's mutable
             if (products.isEmpty()) {
                 return;
             }
@@ -73,8 +72,8 @@ public class OrderScheduler {
 
             logger.info("Random order created successfully with ID: {}", order.getId());
 
-            } catch (Exception e) {
-                logger.error("Failed to create random order: ", e);
+        } catch (Exception e) {
+            logger.error("Failed to create random order: ", e);
         }
     }
 }
