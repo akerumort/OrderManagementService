@@ -6,6 +6,7 @@ import com.akerumort.OrderManagementService.entities.Product;
 import com.akerumort.OrderManagementService.exceptions.CustomValidationException;
 import com.akerumort.OrderManagementService.mappers.ProductMapper;
 import com.akerumort.OrderManagementService.services.ProductService;
+import com.akerumort.OrderManagementService.utils.ValidationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
@@ -51,13 +52,7 @@ public class ProductController {
     public ProductDTO createProduct(
             @Parameter(description = "Product details", required = true)
             @Valid @RequestBody ProductCreateDTO productCreateDTO, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-            for (FieldError error : bindingResult.getFieldErrors()) {
-                errors.put(error.getField(), error.getDefaultMessage());
-            }
-            throw new CustomValidationException("Validation errors: " + errors.toString());
-        }
+        ValidationUtil.validateBindingResult(bindingResult);
         Product product = productMapper.toEntity(productCreateDTO);
         Product savedProduct = productService.saveProduct(product);
         return productMapper.toDTO(savedProduct);
@@ -70,13 +65,7 @@ public class ProductController {
             @PathVariable Long id,
             @Parameter(description = "Updated product details", required = true)
             @Valid @RequestBody ProductCreateDTO productCreateDTO, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-            for (FieldError error : bindingResult.getFieldErrors()) {
-                errors.put(error.getField(), error.getDefaultMessage());
-            }
-            throw new CustomValidationException("Validation errors: " + errors.toString());
-        }
+        ValidationUtil.validateBindingResult(bindingResult);
         Product product = productMapper.toEntity(productCreateDTO);
         product.setId(id);
         Product updatedProduct = productService.saveProduct(product);

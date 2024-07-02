@@ -7,6 +7,7 @@ import com.akerumort.OrderManagementService.entities.Product;
 import com.akerumort.OrderManagementService.exceptions.CustomValidationException;
 import com.akerumort.OrderManagementService.mappers.OrderMapper;
 import com.akerumort.OrderManagementService.services.OrderService;
+import com.akerumort.OrderManagementService.utils.ValidationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
@@ -58,13 +59,7 @@ public class OrderController {
     public OrderDTO createOrder(
             @Parameter(description = "Order details", required = true)
             @Valid @RequestBody OrderCreateDTO orderCreateDTO, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-            for (FieldError error : bindingResult.getFieldErrors()) {
-                errors.put(error.getField(), error.getDefaultMessage());
-            }
-            throw new CustomValidationException("Validation errors: " + errors.toString());
-        }
+        ValidationUtil.validateBindingResult(bindingResult);
         Order order = orderMapper.toEntity(orderCreateDTO);
         Order savedOrder = orderService.saveOrder(order);
         return orderMapper.toDTO(savedOrder);
@@ -77,13 +72,7 @@ public class OrderController {
             @PathVariable Long id,
             @Parameter(description = "Updated order details", required = true)
             @Valid @RequestBody OrderCreateDTO orderCreateDTO, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-            for (FieldError error : bindingResult.getFieldErrors()) {
-                errors.put(error.getField(), error.getDefaultMessage());
-            }
-            throw new CustomValidationException("Validation errors: " + errors.toString());
-        }
+        ValidationUtil.validateBindingResult(bindingResult);
         Order existingOrder = orderService.getOrderById(id);
         Order updatedOrder = orderMapper.toEntity(orderCreateDTO);
         updatedOrder.setId(existingOrder.getId());

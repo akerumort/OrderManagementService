@@ -6,6 +6,7 @@ import com.akerumort.OrderManagementService.entities.Customer;
 import com.akerumort.OrderManagementService.exceptions.CustomValidationException;
 import com.akerumort.OrderManagementService.mappers.CustomerMapper;
 import com.akerumort.OrderManagementService.services.CustomerService;
+import com.akerumort.OrderManagementService.utils.ValidationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
@@ -51,13 +52,7 @@ public class CustomerController {
     public CustomerDTO createCustomer(
             @Parameter(description = "Customer details", required = true)
             @Valid @RequestBody CustomerCreateDTO customerCreateDTO, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-            for (FieldError error : bindingResult.getFieldErrors()) {
-                errors.put(error.getField(), error.getDefaultMessage());
-            }
-            throw new CustomValidationException("Validation errors: " + errors.toString());
-        }
+        ValidationUtil.validateBindingResult(bindingResult);
         Customer customer = customerMapper.toEntity(customerCreateDTO);
         Customer savedCustomer = customerService.saveCustomer(customer);
         return customerMapper.toDTO(savedCustomer);
@@ -70,13 +65,7 @@ public class CustomerController {
             @PathVariable Long id,
             @Parameter(description = "Updated customer details", required = true)
             @Valid @RequestBody CustomerCreateDTO customerCreateDTO, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-            for (FieldError error : bindingResult.getFieldErrors()) {
-                errors.put(error.getField(), error.getDefaultMessage());
-            }
-            throw new CustomValidationException("Validation errors: " + errors.toString());
-        }
+        ValidationUtil.validateBindingResult(bindingResult);
         Customer customer = customerMapper.toEntity(customerCreateDTO);
         customer.setId(id);
         Customer updatedCustomer = customerService.saveCustomer(customer);
