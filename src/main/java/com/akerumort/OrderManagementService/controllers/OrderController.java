@@ -7,17 +7,22 @@ import com.akerumort.OrderManagementService.entities.Product;
 import com.akerumort.OrderManagementService.exceptions.CustomValidationException;
 import com.akerumort.OrderManagementService.mappers.OrderMapper;
 import com.akerumort.OrderManagementService.services.OrderService;
+import com.akerumort.OrderManagementService.utils.ValidationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -53,14 +58,11 @@ public class OrderController {
     @Operation(summary = "Create a new order", description = "Create a new order with customer and products")
     public OrderDTO createOrder(
             @Parameter(description = "Order details", required = true)
-            @Valid @RequestBody OrderCreateDTO orderCreateDTO) {
-        try {
-            Order order = orderMapper.toEntity(orderCreateDTO);
-            Order savedOrder = orderService.saveOrder(order);
-            return orderMapper.toDTO(savedOrder);
-        } catch (Exception e) {
-            throw new CustomValidationException("Error creating order: " + e.getMessage());
-        }
+            @Valid @RequestBody OrderCreateDTO orderCreateDTO, BindingResult bindingResult) {
+        ValidationUtil.validateBindingResult(bindingResult);
+        Order order = orderMapper.toEntity(orderCreateDTO);
+        Order savedOrder = orderService.saveOrder(order);
+        return orderMapper.toDTO(savedOrder);
     }
 
     @PutMapping("/{id}")
@@ -69,16 +71,13 @@ public class OrderController {
             @Parameter(description = "Order ID", required = true)
             @PathVariable Long id,
             @Parameter(description = "Updated order details", required = true)
-            @Valid @RequestBody OrderCreateDTO orderCreateDTO) {
-        try {
-            Order existingOrder = orderService.getOrderById(id);
-            Order updatedOrder = orderMapper.toEntity(orderCreateDTO);
-            updatedOrder.setId(existingOrder.getId());
-            Order savedOrder = orderService.saveOrder(updatedOrder);
-            return orderMapper.toDTO(savedOrder);
-        } catch (Exception e) {
-            throw new CustomValidationException("Error updating order: " + e.getMessage());
-        }
+            @Valid @RequestBody OrderCreateDTO orderCreateDTO, BindingResult bindingResult) {
+        ValidationUtil.validateBindingResult(bindingResult);
+        Order existingOrder = orderService.getOrderById(id);
+        Order updatedOrder = orderMapper.toEntity(orderCreateDTO);
+        updatedOrder.setId(existingOrder.getId());
+        Order savedOrder = orderService.saveOrder(updatedOrder);
+        return orderMapper.toDTO(savedOrder);
     }
 
     @Operation(summary = "Delete an order", description = "Delete an order by ID")
