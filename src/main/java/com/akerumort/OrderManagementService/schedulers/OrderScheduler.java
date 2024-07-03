@@ -53,7 +53,7 @@ public class OrderScheduler {
             Customer randomCustomer = customers.get(random.nextInt(customers.size()));
 
             // random products
-            List<Product> products = new ArrayList<>(productService.getAllProducts(0, 100)); // ensure it's mutable
+            List<Product> products = new ArrayList<>(productService.getAllProducts(0, 100));
             if (products.isEmpty()) {
                 return;
             }

@@ -12,31 +12,24 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.itextpdf.io.font.constants.StandardFonts;
-import com.itextpdf.kernel.font.PdfFontFactory;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Paragraph;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
@@ -126,12 +119,21 @@ public class OrderController {
         logger.info("Generating orders report...");
 
         try {
-            List<Order> orders = orderService.getAllOrders();
+            Pageable pageable = PageRequest.of(0, 10);
+            Page<Order> ordersPage = orderService.getAllOrders(pageable);
+            List<Order> allOrders = new ArrayList<>(ordersPage.getContent());
+
+            while (ordersPage.hasNext()) {
+                pageable = ordersPage.nextPageable();
+                ordersPage = orderService.getAllOrders(pageable);
+                allOrders.addAll(ordersPage.getContent());
+            }
+
             StringBuilder report = new StringBuilder();
             report.append("Order Report\n");
             report.append("Generated at: ").append(Timestamp.valueOf(LocalDateTime.now())).append("\n\n");
 
-            for (Order order : orders) {
+            for (Order order : allOrders) {
                 report.append("Order ID: ").append(order.getId()).append("\n");
                 report.append("Customer ID: ").append(order.getCustomer().getId()).append("\n");
                 report.append("Product IDs: ");
@@ -159,44 +161,24 @@ public class OrderController {
     @Operation(summary = "Get orders report in PDF", description = "Generate a PDF report of all completed orders")
     public ResponseEntity<byte[]> generatePdfReport() {
         logger.info("Generating PDF orders report...");
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         try {
-            List<Order> orders = orderService.getAllOrders();
+            Pageable pageable = PageRequest.of(0, 10);
+            Page<Order> ordersPage = orderService.getAllOrders(pageable);
+            List<Order> allOrders = new ArrayList<>(ordersPage.getContent());
 
-            PdfWriter writer = new PdfWriter(out);
-            PdfDocument pdfDoc = new PdfDocument(writer);
-            Document document = new Document(pdfDoc);
-
-            document.add(new Paragraph("Order Report")
-                    .setFont(PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD))
-                    .setFontSize(18));
-
-            document.add(new Paragraph("Generated at: " + Timestamp.valueOf(LocalDateTime.now()))
-                    .setFont(PdfFontFactory.createFont(StandardFonts.HELVETICA))
-                    .setFontSize(12));
-
-            for (Order order : orders) {
-                document.add(new Paragraph("Order ID: " + order.getId()));
-                document.add(new Paragraph("Customer ID: " + order.getCustomer().getId()));
-                String productIds = order.getProducts().stream()
-                        .map(product -> String.valueOf(product.getId()))
-                        .collect(Collectors.joining(", "));
-                document.add(new Paragraph("Product IDs: " + productIds));
-                String productNames = order.getProducts().stream()
-                        .map(Product::getName)
-                        .collect(Collectors.joining(", "));
-                document.add(new Paragraph("Product Names: " + productNames));
-                document.add(new Paragraph("Order Date: " + order.getOrderDate()));
-                document.add(new Paragraph(" "));
+            while (ordersPage.hasNext()) {
+                pageable = ordersPage.nextPageable();
+                ordersPage = orderService.getAllOrders(pageable);
+                allOrders.addAll(ordersPage.getContent());
             }
 
-            document.close();
+            byte[] pdfReport = orderService.generatePdfReport(allOrders);
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=orders_report.pdf")
                     .contentType(MediaType.APPLICATION_PDF)
-                    .body(out.toByteArray());
+                    .body(pdfReport);
 
         } catch (Exception e) {
             logger.error("Error generating PDF report", e);
@@ -208,44 +190,24 @@ public class OrderController {
     @Operation(summary = "Get orders report in Excel", description = "Generate an Excel report of all completed orders")
     public ResponseEntity<byte[]> generateExcelReport() {
         logger.info("Generating Excel orders report...");
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         try {
-            List<Order> orders = orderService.getAllOrders();
+            Pageable pageable = PageRequest.of(0, 10);
+            Page<Order> ordersPage = orderService.getAllOrders(pageable);
+            List<Order> allOrders = new ArrayList<>(ordersPage.getContent());
 
-            Workbook workbook = new XSSFWorkbook();
-            Sheet sheet = workbook.createSheet("Orders Report");
-
-            Row header = sheet.createRow(0);
-            header.createCell(0).setCellValue("Order ID");
-            header.createCell(1).setCellValue("Customer ID");
-            header.createCell(2).setCellValue("Product IDs");
-            header.createCell(3).setCellValue("Product Names");
-            header.createCell(4).setCellValue("Order Date");
-
-            int rowIdx = 1;
-            for (Order order : orders) {
-                Row row = sheet.createRow(rowIdx++);
-                row.createCell(0).setCellValue(order.getId());
-                row.createCell(1).setCellValue(order.getCustomer().getId());
-                String productIds = order.getProducts().stream()
-                        .map(product -> String.valueOf(product.getId()))
-                        .collect(Collectors.joining(", "));
-                row.createCell(2).setCellValue(productIds);
-                String productNames = order.getProducts().stream()
-                        .map(Product::getName)
-                        .collect(Collectors.joining(", "));
-                row.createCell(3).setCellValue(productNames);
-                row.createCell(4).setCellValue(order.getOrderDate().toString());
+            while (ordersPage.hasNext()) {
+                pageable = ordersPage.nextPageable();
+                ordersPage = orderService.getAllOrders(pageable);
+                allOrders.addAll(ordersPage.getContent());
             }
 
-            workbook.write(out);
-            workbook.close();
+            byte[] excelReport = orderService.generateExcelReport(allOrders);
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=orders_report.xlsx")
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .body(out.toByteArray());
+                    .body(excelReport);
 
         } catch (IOException e) {
             logger.error("Error generating Excel report", e);
