@@ -101,7 +101,13 @@ public class OrderController {
             }
             throw new CustomValidationException("Validation errors: " + errors.toString());
         }
+        Order existingOrder = orderService.getOrderById(id);
+        if (existingOrder == null) {
+            throw new CustomValidationException("Order with ID " + id + " does not exist");
+        }
+
         Order updatedOrder = orderMapper.toEntity(orderCreateDTO);
+        updatedOrder.setId(id);
         Order savedOrder = orderService.saveOrder(updatedOrder);
         return orderMapper.toDTO(savedOrder);
     }

@@ -82,9 +82,14 @@ public class CustomerController {
             }
             throw new CustomValidationException("Validation errors: " + errors.toString());
         }
-        Customer customer = customerMapper.toEntity(customerCreateDTO);
-        Customer updatedCustomer = customerService.saveCustomer(customer);
-        return customerMapper.toDTO(updatedCustomer);
+        Customer existingCustomer = customerService.getCustomerById(id);
+        if (existingCustomer == null) {
+            throw new CustomValidationException("Customer with ID " + id + " does not exist");
+        }
+        Customer updatedCustomer = customerMapper.toEntity(customerCreateDTO);
+        updatedCustomer.setId(id);
+        Customer savedCustomer = customerService.saveCustomer(updatedCustomer);
+        return customerMapper.toDTO(savedCustomer);
     }
 
     @Operation(summary = "Delete a customer", description = "Delete a customer by ID")

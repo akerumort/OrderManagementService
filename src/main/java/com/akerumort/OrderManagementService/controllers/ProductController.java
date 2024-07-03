@@ -82,9 +82,15 @@ public class ProductController {
             }
             throw new CustomValidationException("Validation errors: " + errors.toString());
         }
-        Product product = productMapper.toEntity(productCreateDTO);
-        Product updatedProduct = productService.saveProduct(product);
-        return productMapper.toDTO(updatedProduct);
+        Product existingProduct = productService.getProductById(id);
+        if (existingProduct == null) {
+            throw new CustomValidationException("Product with ID " + id + " does not exist");
+        }
+
+        Product updatedProduct = productMapper.toEntity(productCreateDTO);
+        updatedProduct.setId(id);
+        Product savedProduct = productService.saveProduct(updatedProduct);
+        return productMapper.toDTO(savedProduct);
     }
 
     @Operation(summary = "Delete a product", description = "Delete a product by ID")
