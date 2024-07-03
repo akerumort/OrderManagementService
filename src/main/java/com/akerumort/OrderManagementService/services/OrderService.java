@@ -45,22 +45,10 @@ public class OrderService {
     @Autowired
     private ProductRepository productRepository;
 
-    public Page<Order> getAllOrders(Pageable pageable) {
-        return orderRepository.findAll(pageable);
-    }
-
-    public List<Order> getAllOrders() {
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Order> ordersPage = getAllOrders(pageable);
-        List<Order> allOrders = new ArrayList<>(ordersPage.getContent());
-
-        while (ordersPage.hasNext()) {
-            pageable = ordersPage.nextPageable();
-            ordersPage = getAllOrders(pageable);
-            allOrders.addAll(ordersPage.getContent());
-        }
-
-        return allOrders;
+    public List<Order> getAllOrders(int page, int size)  {
+        logger.info("Fetching orders with pagination");
+        Pageable pageable = PageRequest.of(page, size);
+        return orderRepository.findAll(pageable).getContent();
     }
 
     public Order getOrderById(Long id) {

@@ -47,9 +47,14 @@ public class OrderController {
     private OrderMapper orderMapper;
 
     @GetMapping
-    @Operation(summary = "Get all orders", description = "Get a list of all orders")
-    public List<OrderDTO> getAllOrders() {
-        return orderService.getAllOrders().stream()
+    @Operation(summary = "Get all orders", description = "Get a list of all orders with pagination")
+    public List<OrderDTO> getAllOrders(
+            @Parameter(description = "Page number", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "10")
+            @RequestParam(defaultValue = "10") int size) {
+        List<Order> orderList = orderService.getAllOrders(page, size);
+        return orderList.stream()
                 .map(orderMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -114,20 +119,16 @@ public class OrderController {
     }
 
     @GetMapping("/report")
-    @Operation(summary = "Get orders report", description = "Generate a report of all completed orders")
-    public String generateReport() {
+    @Operation(summary = "Get orders report", description = "Generate a report of all completed orders with pagination")
+    public String generateReport(
+            @Parameter(description = "Page number", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "10")
+            @RequestParam(defaultValue = "10") int size) {
         logger.info("Generating orders report...");
 
         try {
-            Pageable pageable = PageRequest.of(0, 10);
-            Page<Order> ordersPage = orderService.getAllOrders(pageable);
-            List<Order> allOrders = new ArrayList<>(ordersPage.getContent());
-
-            while (ordersPage.hasNext()) {
-                pageable = ordersPage.nextPageable();
-                ordersPage = orderService.getAllOrders(pageable);
-                allOrders.addAll(ordersPage.getContent());
-            }
+            List<Order> allOrders = orderService.getAllOrders(page, size);
 
             StringBuilder report = new StringBuilder();
             report.append("Order Report\n");
@@ -158,21 +159,16 @@ public class OrderController {
     }
 
     @GetMapping("/report/pdf")
-    @Operation(summary = "Get orders report in PDF", description = "Generate a PDF report of all completed orders")
-    public ResponseEntity<byte[]> generatePdfReport() {
+    @Operation(summary = "Get orders report in PDF", description = "Generate a PDF report of all completed orders with pagination")
+    public ResponseEntity<byte[]> generatePdfReport(
+            @Parameter(description = "Page number", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "10")
+            @RequestParam(defaultValue = "10") int size) {
         logger.info("Generating PDF orders report...");
 
         try {
-            Pageable pageable = PageRequest.of(0, 10);
-            Page<Order> ordersPage = orderService.getAllOrders(pageable);
-            List<Order> allOrders = new ArrayList<>(ordersPage.getContent());
-
-            while (ordersPage.hasNext()) {
-                pageable = ordersPage.nextPageable();
-                ordersPage = orderService.getAllOrders(pageable);
-                allOrders.addAll(ordersPage.getContent());
-            }
-
+            List<Order> allOrders = orderService.getAllOrders(page, size);
             byte[] pdfReport = orderService.generatePdfReport(allOrders);
 
             return ResponseEntity.ok()
@@ -187,21 +183,16 @@ public class OrderController {
     }
 
     @GetMapping("/report/excel")
-    @Operation(summary = "Get orders report in Excel", description = "Generate an Excel report of all completed orders")
-    public ResponseEntity<byte[]> generateExcelReport() {
+    @Operation(summary = "Get orders report in Excel", description = "Generate an Excel report of all completed orders with pagination")
+    public ResponseEntity<byte[]> generateExcelReport(
+            @Parameter(description = "Page number", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "10")
+            @RequestParam(defaultValue = "10") int size) {
         logger.info("Generating Excel orders report...");
 
         try {
-            Pageable pageable = PageRequest.of(0, 10);
-            Page<Order> ordersPage = orderService.getAllOrders(pageable);
-            List<Order> allOrders = new ArrayList<>(ordersPage.getContent());
-
-            while (ordersPage.hasNext()) {
-                pageable = ordersPage.nextPageable();
-                ordersPage = orderService.getAllOrders(pageable);
-                allOrders.addAll(ordersPage.getContent());
-            }
-
+            List<Order> allOrders = orderService.getAllOrders(page, size);
             byte[] excelReport = orderService.generateExcelReport(allOrders);
 
             return ResponseEntity.ok()
