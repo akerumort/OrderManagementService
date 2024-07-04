@@ -104,9 +104,39 @@ public class OrderService {
         logger.info("Order with ID " + id + " deleted successfully");
     }
 
-    public byte[] generatePdfReport(List<Order> orders) throws Exception {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+    public String generateReport() {
+        StringBuilder report = new StringBuilder();
+        report.append("Order Report\n");
+        report.append("Generated at: ").append(Timestamp.valueOf(LocalDateTime.now())).append("\n\n");
 
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Order> orderPage;
+
+        do {
+            orderPage = orderRepository.findAll(pageable);
+            for (Order order : orderPage.getContent()) {
+                report.append("Order ID: ").append(order.getId()).append("\n");
+                report.append("Customer ID: ").append(order.getCustomer().getId()).append("\n");
+                report.append("Product IDs: ");
+                String productIds = order.getProducts().stream()
+                        .map(product -> String.valueOf(product.getId()))
+                        .collect(Collectors.joining(", "));
+                report.append(productIds).append("\n");
+                report.append("Product Names: ");
+                String productNames = order.getProducts().stream()
+                        .map(Product::getName)
+                        .collect(Collectors.joining(", "));
+                report.append(productNames).append("\n");
+                report.append("Order Date: ").append(order.getOrderDate()).append("\n\n");
+            }
+            pageable = orderPage.nextPageable();
+        } while (orderPage.hasNext());
+
+        return report.toString();
+    }
+
+    public byte[] generatePdfReport() throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
         PdfWriter writer = new PdfWriter(out);
         PdfDocument pdfDoc = new PdfDocument(writer);
         Document document = new Document(pdfDoc);
@@ -119,6 +149,20 @@ public class OrderService {
                 .setFont(PdfFontFactory.createFont(StandardFonts.HELVETICA))
                 .setFontSize(12));
 
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Order> orderPage;
+
+        do {
+            orderPage = orderRepository.findAll(pageable);
+            doStuff(orderPage.getContent(), document);
+            pageable = orderPage.nextPageable();
+        } while (orderPage.hasNext());
+
+        document.close();
+        return out.toByteArray();
+    }
+
+    private void doStuff(List<Order> orders, Document document) {
         for (Order order : orders) {
             document.add(new Paragraph("Order ID: " + order.getId()));
             document.add(new Paragraph("Customer ID: " + order.getCustomer().getId()));
@@ -133,14 +177,10 @@ public class OrderService {
             document.add(new Paragraph("Order Date: " + order.getOrderDate()));
             document.add(new Paragraph(" "));
         }
-
-        document.close();
-        return out.toByteArray();
     }
 
-    public byte[] generateExcelReport(List<Order> orders) throws IOException {
+    public byte[] generateExcelReport() throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Orders Report");
 
@@ -151,7 +191,22 @@ public class OrderService {
         header.createCell(3).setCellValue("Product Names");
         header.createCell(4).setCellValue("Order Date");
 
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Order> orderPage;
         int rowIdx = 1;
+
+        do {
+            orderPage = orderRepository.findAll(pageable);
+            rowIdx = doStuff(orderPage.getContent(), sheet, rowIdx);
+            pageable = orderPage.nextPageable();
+        } while (orderPage.hasNext());
+
+        workbook.write(out);
+        workbook.close();
+        return out.toByteArray();
+    }
+
+    private int doStuff(List<Order> orders, Sheet sheet, int rowIdx) {
         for (Order order : orders) {
             Row row = sheet.createRow(rowIdx++);
             row.createCell(0).setCellValue(order.getId());
@@ -166,10 +221,7 @@ public class OrderService {
             row.createCell(3).setCellValue(productNames);
             row.createCell(4).setCellValue(order.getOrderDate().toString());
         }
-
-        workbook.write(out);
-        workbook.close();
-
-        return out.toByteArray();
+        return rowIdx;
     }
+
 }

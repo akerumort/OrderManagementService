@@ -119,39 +119,14 @@ public class OrderController {
     }
 
     @GetMapping("/report")
-    @Operation(summary = "Get orders report", description = "Generate a report of all completed orders with pagination")
-    public String generateReport(
-            @Parameter(description = "Page number", example = "0")
-            @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size", example = "10")
-            @RequestParam(defaultValue = "10") int size) {
+    @Operation(summary = "Get orders report", description = "Generate a report of all completed orders")
+    public String generateReport() {
         logger.info("Generating orders report...");
 
         try {
-            List<Order> allOrders = orderService.getAllOrders(page, size);
-
-            StringBuilder report = new StringBuilder();
-            report.append("Order Report\n");
-            report.append("Generated at: ").append(Timestamp.valueOf(LocalDateTime.now())).append("\n\n");
-
-            for (Order order : allOrders) {
-                report.append("Order ID: ").append(order.getId()).append("\n");
-                report.append("Customer ID: ").append(order.getCustomer().getId()).append("\n");
-                report.append("Product IDs: ");
-                String productIds = order.getProducts().stream()
-                        .map(product -> String.valueOf(product.getId()))
-                        .collect(Collectors.joining(", "));
-                report.append(productIds).append("\n");
-                report.append("Product Names: ");
-                String productNames = order.getProducts().stream()
-                        .map(Product::getName)
-                        .collect(Collectors.joining(", "));
-                report.append(productNames).append("\n");
-                report.append("Order Date: ").append(order.getOrderDate()).append("\n\n");
-            }
-
+            String report = orderService.generateReport();
             logger.info("Report generated successfully");
-            return report.toString();
+            return report;
         } catch (Exception e) {
             logger.error("Error generating report", e);
             return "Error generating report: " + e.getMessage();
@@ -159,17 +134,12 @@ public class OrderController {
     }
 
     @GetMapping("/report/pdf")
-    @Operation(summary = "Get orders report in PDF", description = "Generate a PDF report of all completed orders with pagination")
-    public ResponseEntity<byte[]> generatePdfReport(
-            @Parameter(description = "Page number", example = "0")
-            @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size", example = "10")
-            @RequestParam(defaultValue = "10") int size) {
+    @Operation(summary = "Get orders report in PDF", description = "Generate a PDF report of all completed orders")
+    public ResponseEntity<byte[]> generatePdfReport() {
         logger.info("Generating PDF orders report...");
 
         try {
-            List<Order> allOrders = orderService.getAllOrders(page, size);
-            byte[] pdfReport = orderService.generatePdfReport(allOrders);
+            byte[] pdfReport = orderService.generatePdfReport();
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=orders_report.pdf")
@@ -183,17 +153,12 @@ public class OrderController {
     }
 
     @GetMapping("/report/excel")
-    @Operation(summary = "Get orders report in Excel", description = "Generate an Excel report of all completed orders with pagination")
-    public ResponseEntity<byte[]> generateExcelReport(
-            @Parameter(description = "Page number", example = "0")
-            @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size", example = "10")
-            @RequestParam(defaultValue = "10") int size) {
+    @Operation(summary = "Get orders report in Excel", description = "Generate an Excel report of all completed orders")
+    public ResponseEntity<byte[]> generateExcelReport() {
         logger.info("Generating Excel orders report...");
 
         try {
-            List<Order> allOrders = orderService.getAllOrders(page, size);
-            byte[] excelReport = orderService.generateExcelReport(allOrders);
+            byte[] excelReport = orderService.generateExcelReport();
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=orders_report.xlsx")
