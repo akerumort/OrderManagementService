@@ -56,13 +56,7 @@ public class ProductController {
     public ProductDTO createProduct(
             @Parameter(description = "Product details", required = true)
             @Valid @RequestBody ProductCreateDTO productCreateDTO, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-            for (FieldError error : bindingResult.getFieldErrors()) {
-                errors.put(error.getField(), error.getDefaultMessage());
-            }
-            throw new CustomValidationException("Validation errors: " + errors.toString());
-        }
+        ValidationUtil.validateBindingResult(bindingResult);
         Product product = productMapper.toEntity(productCreateDTO);
         Product savedProduct = productService.saveProduct(product);
         return productMapper.toDTO(savedProduct);
@@ -75,22 +69,11 @@ public class ProductController {
             @PathVariable Long id,
             @Parameter(description = "Updated product details", required = true)
             @Valid @RequestBody ProductCreateDTO productCreateDTO, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-            for (FieldError error : bindingResult.getFieldErrors()) {
-                errors.put(error.getField(), error.getDefaultMessage());
-            }
-            throw new CustomValidationException("Validation errors: " + errors.toString());
-        }
-        Product existingProduct = productService.getProductById(id);
-        if (existingProduct == null) {
-            throw new CustomValidationException("Product with ID " + id + " does not exist");
-        }
-
-        Product updatedProduct = productMapper.toEntity(productCreateDTO);
-        updatedProduct.setId(id);
-        Product savedProduct = productService.saveProduct(updatedProduct);
-        return productMapper.toDTO(savedProduct);
+        ValidationUtil.validateBindingResult(bindingResult);
+        Product product = productMapper.toEntity(productCreateDTO);
+        product.setId(id);
+        Product updatedProduct = productService.saveProduct(product);
+        return productMapper.toDTO(updatedProduct);
     }
 
     @Operation(summary = "Delete a product", description = "Delete a product by ID")

@@ -21,7 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -154,7 +153,7 @@ public class OrderService {
 
         do {
             orderPage = orderRepository.findAll(pageable);
-            doStuff(orderPage.getContent(), document);
+            processOrderBatch(orderPage.getContent(), document);
             pageable = orderPage.nextPageable();
         } while (orderPage.hasNext());
 
@@ -162,7 +161,7 @@ public class OrderService {
         return out.toByteArray();
     }
 
-    private void doStuff(List<Order> orders, Document document) {
+    private void processOrderBatch(List<Order> orders, Document document) {
         for (Order order : orders) {
             document.add(new Paragraph("Order ID: " + order.getId()));
             document.add(new Paragraph("Customer ID: " + order.getCustomer().getId()));
@@ -197,7 +196,7 @@ public class OrderService {
 
         do {
             orderPage = orderRepository.findAll(pageable);
-            rowIdx = doStuff(orderPage.getContent(), sheet, rowIdx);
+            rowIdx = processOrderBatch(orderPage.getContent(), sheet, rowIdx);
             pageable = orderPage.nextPageable();
         } while (orderPage.hasNext());
 
@@ -206,7 +205,7 @@ public class OrderService {
         return out.toByteArray();
     }
 
-    private int doStuff(List<Order> orders, Sheet sheet, int rowIdx) {
+    private int processOrderBatch(List<Order> orders, Sheet sheet, int rowIdx) {
         for (Order order : orders) {
             Row row = sheet.createRow(rowIdx++);
             row.createCell(0).setCellValue(order.getId());
