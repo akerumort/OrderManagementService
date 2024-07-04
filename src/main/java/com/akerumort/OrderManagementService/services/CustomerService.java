@@ -5,6 +5,9 @@ import com.akerumort.OrderManagementService.repositories.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,9 +19,11 @@ public class CustomerService {
     @Autowired
     private CustomerRepository customerRepository;
 
-    public List<Customer> getAllCustomers() {
-        logger.info("Fetched all customers");
-        return customerRepository.findAll();
+    public List<Customer> getAllCustomers(int page, int size) {
+        logger.info("Fetching customers with pagination");
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Customer> customerPage = customerRepository.findAll(pageable);
+        return customerPage.getContent();
     }
 
     public Customer getCustomerById(Long id) {

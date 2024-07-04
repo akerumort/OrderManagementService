@@ -14,16 +14,26 @@ import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+
 
 @RestController
 @RequestMapping("/orders")
@@ -38,9 +48,14 @@ public class OrderController {
     private OrderMapper orderMapper;
 
     @GetMapping
-    @Operation(summary = "Get all orders", description = "Get a list of all orders")
-    public List<OrderDTO> getAllOrders() {
-        return orderService.getAllOrders().stream()
+    @Operation(summary = "Get all orders", description = "Get a list of all orders with pagination")
+    public List<OrderDTO> getAllOrders(
+            @Parameter(description = "Page number", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "10")
+            @RequestParam(defaultValue = "10") int size) {
+        List<Order> orderList = orderService.getAllOrders(page, size);
+        return orderList.stream()
                 .map(orderMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -74,8 +89,12 @@ public class OrderController {
             @Valid @RequestBody OrderCreateDTO orderCreateDTO, BindingResult bindingResult) {
         ValidationUtil.validateBindingResult(bindingResult);
         Order existingOrder = orderService.getOrderById(id);
+        if (existingOrder == null) {
+            throw new CustomValidationException("Order with ID " + id + " does not exist");
+        }
+
         Order updatedOrder = orderMapper.toEntity(orderCreateDTO);
-        updatedOrder.setId(existingOrder.getId());
+        updatedOrder.setId(id);
         Order savedOrder = orderService.saveOrder(updatedOrder);
         return orderMapper.toDTO(savedOrder);
     }
@@ -94,32 +113,50 @@ public class OrderController {
         logger.info("Generating orders report...");
 
         try {
-            List<Order> orders = orderService.getAllOrders();
-            StringBuilder report = new StringBuilder();
-            report.append("Order Report\n");
-            report.append("Generated at: ").append(Timestamp.valueOf(LocalDateTime.now())).append("\n\n");
-
-            for (Order order : orders) {
-                report.append("Order ID: ").append(order.getId()).append("\n");
-                report.append("Customer ID: ").append(order.getCustomer().getId()).append("\n");
-                report.append("Product IDs: ");
-                String productIds = order.getProducts().stream()
-                        .map(product -> String.valueOf(product.getId()))
-                        .collect(Collectors.joining(", "));
-                report.append(productIds).append("\n");
-                report.append("Product Names: ");
-                String productNames = order.getProducts().stream()
-                        .map(Product::getName)
-                        .collect(Collectors.joining(", "));
-                report.append(productNames).append("\n");
-                report.append("Order Date: ").append(order.getOrderDate()).append("\n\n");
-            }
-
+            String report = orderService.generateReport();
             logger.info("Report generated successfully");
-            return report.toString();
+            return report;
         } catch (Exception e) {
             logger.error("Error generating report", e);
             return "Error generating report: " + e.getMessage();
+        }
+    }
+
+    @GetMapping("/report/pdf")
+    @Operation(summary = "Get orders report in PDF", description = "Generate a PDF report of all completed orders")
+    public ResponseEntity<byte[]> generatePdfReport() {
+        logger.info("Generating PDF orders report...");
+
+        try {
+            byte[] pdfReport = orderService.generatePdfReport();
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=orders_report.pdf")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdfReport);
+
+        } catch (Exception e) {
+            logger.error("Error generating PDF report", e);
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    @GetMapping("/report/excel")
+    @Operation(summary = "Get orders report in Excel", description = "Generate an Excel report of all completed orders")
+    public ResponseEntity<byte[]> generateExcelReport() {
+        logger.info("Generating Excel orders report...");
+
+        try {
+            byte[] excelReport = orderService.generateExcelReport();
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=orders_report.xlsx")
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(excelReport);
+
+        } catch (IOException e) {
+            logger.error("Error generating Excel report", e);
+            return ResponseEntity.status(500).body(null);
         }
     }
 }

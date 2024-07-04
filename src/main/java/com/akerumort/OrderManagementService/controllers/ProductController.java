@@ -31,9 +31,14 @@ public class ProductController {
     private ProductMapper productMapper;
 
     @GetMapping
-    @Operation(summary = "Get all products", description = "Get a list of all products")
-    public List<ProductDTO> getAllProducts() {
-        return productService.getAllProducts().stream()
+    @Operation(summary = "Get all products", description = "Get a list of all products with pagination")
+    public List<ProductDTO> getAllProducts(
+            @Parameter(description = "Page number", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "10")
+            @RequestParam(defaultValue = "10") int size) {
+        List<Product> productList = productService.getAllProducts(page, size);
+        return productList.stream()
                 .map(productMapper::toDTO)
                 .collect(Collectors.toList());
     }

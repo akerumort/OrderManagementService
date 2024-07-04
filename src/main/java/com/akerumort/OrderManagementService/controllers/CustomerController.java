@@ -32,8 +32,13 @@ public class CustomerController {
 
     @GetMapping
     @Operation(summary = "Get all customers", description = "Get a list of all customers")
-    public List<CustomerDTO> getAllCustomers() {
-        return customerService.getAllCustomers().stream()
+    public List<CustomerDTO> getAllCustomers(
+            @Parameter(description = "Page number", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "10")
+            @RequestParam(defaultValue = "10") int size) {
+        List<Customer> customers = customerService.getAllCustomers(page, size);
+        return customers.stream()
                 .map(customerMapper::toDTO)
                 .collect(Collectors.toList());
     }
