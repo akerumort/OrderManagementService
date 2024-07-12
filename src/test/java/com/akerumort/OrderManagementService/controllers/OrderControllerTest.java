@@ -4,6 +4,7 @@ import com.akerumort.OrderManagementService.dto.OrderDTO;
 import com.akerumort.OrderManagementService.entities.Order;
 import com.akerumort.OrderManagementService.mappers.OrderMapper;
 import com.akerumort.OrderManagementService.services.OrderService;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,19 +32,22 @@ public class OrderControllerTest {
     @InjectMocks
     private OrderController orderController;
 
-    private MockMvc mockMvc;
-    private Order order;
-    private OrderDTO orderDTO;
+    private static MockMvc mockMvc;
+    private static Order order;
+    private static OrderDTO orderDTO;
 
-    @BeforeEach
-    public void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(orderController).build();
-
+    @BeforeAll
+    public static void setUp() {
         order = new Order();
         order.setId(1L);
 
         orderDTO = new OrderDTO();
         orderDTO.setId(1L);
+    }
+
+    @BeforeEach
+    public void setUpEach() {
+        mockMvc = MockMvcBuilders.standaloneSetup(orderController).build();
     }
 
     @Test
