@@ -3,7 +3,6 @@ package com.akerumort.OrderManagementService.controllers;
 import com.akerumort.OrderManagementService.dto.ProductCreateDTO;
 import com.akerumort.OrderManagementService.dto.ProductDTO;
 import com.akerumort.OrderManagementService.entities.Product;
-import com.akerumort.OrderManagementService.exceptions.CustomValidationException;
 import com.akerumort.OrderManagementService.mappers.ProductMapper;
 import com.akerumort.OrderManagementService.services.ProductService;
 import com.akerumort.OrderManagementService.utils.ValidationUtil;
@@ -12,12 +11,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController

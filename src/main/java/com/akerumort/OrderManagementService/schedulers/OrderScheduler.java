@@ -4,7 +4,6 @@ import com.akerumort.OrderManagementService.dto.OrderCreateDTO;
 import com.akerumort.OrderManagementService.entities.Customer;
 import com.akerumort.OrderManagementService.entities.Order;
 import com.akerumort.OrderManagementService.entities.Product;
-import com.akerumort.OrderManagementService.mappers.CustomerMapper;
 import com.akerumort.OrderManagementService.mappers.OrderMapper;
 import com.akerumort.OrderManagementService.services.CustomerService;
 import com.akerumort.OrderManagementService.services.OrderService;
@@ -45,14 +44,12 @@ public class OrderScheduler {
     @Scheduled(fixedRate = 60000) // every 60 sec
     public void createRandomOrder() {
         try {
-            // random customers
             List<Customer> customers = customerService.getAllCustomers(0, 100);
             if (customers.isEmpty()) {
                 return;
             }
             Customer randomCustomer = customers.get(random.nextInt(customers.size()));
 
-            // random products
             List<Product> products = new ArrayList<>(productService.getAllProducts(0, 100));
             if (products.isEmpty()) {
                 return;
@@ -62,7 +59,6 @@ public class OrderScheduler {
             List<Long> randomProductIds = products.subList(0, Math.min(3, products.size()))
                     .stream().map(Product::getId).collect(Collectors.toList());
 
-            // create order
             OrderCreateDTO orderCreateDTO = new OrderCreateDTO();
             orderCreateDTO.setCustomerId(randomCustomer.getId());
             orderCreateDTO.setProductIds(randomProductIds);

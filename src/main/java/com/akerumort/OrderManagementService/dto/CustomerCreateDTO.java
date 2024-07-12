@@ -1,6 +1,5 @@
 package com.akerumort.OrderManagementService.dto;
 
-import lombok.Data;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;

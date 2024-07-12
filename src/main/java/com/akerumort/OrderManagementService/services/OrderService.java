@@ -58,7 +58,7 @@ public class OrderService {
 
     public Order saveOrder(Order order) {
         validateOrder(order);
-        order.setOrderDate(new Timestamp(System.currentTimeMillis())); // текущая дата и время
+        order.setOrderDate(new Timestamp(System.currentTimeMillis())); // current date and time
 
         String productsInfo = order.getProducts().stream()
                 .map(product -> "ID: " + product.getId())
@@ -71,29 +71,29 @@ public class OrderService {
 
     private void validateOrder(Order order) {
         if (order.getCustomer() == null || order.getCustomer().getId() == null) {
-            logger.error("Customer is required for creating an order. Order creation failed.");
+            logger.error("Customer is required for creating an order. Order creation failed");
             throw new IllegalArgumentException("Customer is required");
         }
 
         if (order.getProducts() == null || order.getProducts().isEmpty()) {
-            logger.error("At least one product is required for creating an order. Order creation failed.");
+            logger.error("At least one product is required for creating an order. Order creation failed");
             throw new IllegalArgumentException("At least one product is required");
         }
 
         order.getProducts().forEach(product -> {
             if (product.getId() == null) {
-                logger.error("Product ID is required for creating an order. Order creation failed.");
+                logger.error("Product ID is required for creating an order. Order creation failed");
                 throw new IllegalArgumentException("Product ID is required");
             }
 
             if (productRepository.findById(product.getId()).isEmpty()) {
-                logger.error("Product with ID " + product.getId() + " not found. Order creation failed.");
+                logger.error("Product with ID " + product.getId() + " not found. Order creation failed");
                 throw new IllegalArgumentException("Product not found");
             }
         });
 
         if (customerRepository.findById(order.getCustomer().getId()).isEmpty()) {
-            logger.error("Customer with ID " + order.getCustomer().getId() + " not found. Order creation failed.");
+            logger.error("Customer with ID " + order.getCustomer().getId() + " not found. Order creation failed");
             throw new IllegalArgumentException("Customer not found");
         }
     }
