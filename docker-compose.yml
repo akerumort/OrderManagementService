@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  postgres: # база данных
+    image: postgres:latest
+    restart: always
+    container_name: postgres
+    environment: # переменные окружения
+      POSTGRES_DB: order_management_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgresadmin
+    volumes: # том для хранения БД
+      - postgres_data:/var/lib/postgresql/data # монтируем сюда именованный том в данную директорию
+    ports:
+      - "5432:5432"
+
+  order-management-service: # сервис управления заказами
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: order-management-service
+    restart: always
+    ports:
+      - "8080:8080"
+    environment: # переменные окружения
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/order_management_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgresadmin
+    depends_on: # устанавливаем зависимость от БД (postgres должна быть запущена раньше, чем этот сервис)
+      - postgres
+
+volumes: # именованный том
+  postgres_data:
