@@ -1,6 +1,6 @@
-<h1 align="center" id="title">OrderManagementService</h1>
+<h1 align="center" id="title">order-management-service</h1>
 
-<p align="center"><img src="https://socialify.git.ci/akerumort/OrderManagementService/image?description=1&font=Raleway&language=1&name=1&owner=1&pattern=Plus&theme=Dark"></p>
+<p align="center"><img src="https://socialify.git.ci/akerumort/order-management-service/image?description=1&font=Jost&language=1&name=1&owner=1&pattern=Circuit%20Board&theme=Dark"></p>
 
 OrderManagementService is a microservice designed to manage orders. It is built using Spring Boot and follows best practices for RESTful services. This service handles CRUD operations for orders and provides a robust API for integrating with other services or front-end applications.
 
